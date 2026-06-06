@@ -2,6 +2,7 @@ package com.quickshop.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -24,6 +25,7 @@ import java.util.concurrent.*;
 
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -59,15 +61,14 @@ public class OrderService {
 
      Order saved = orderRepository.save(order);
 
-//     // Example: use CompletableFuture to do parallel side-work (e.g., call pricing/discount service)
-//     CompletableFuture<Void> asyncSideEffect = CompletableFuture.runAsync(() -> {
-//         // heavy work - email, audit log, etc.
-//         try {
-//             Thread.sleep(50);
-//         } catch (InterruptedException e) {
-//             Thread.currentThread().interrupt();
-//         }
-//     }, executorService);
+     CompletableFuture<Void> asyncSideEffect = CompletableFuture.runAsync(() -> {
+
+         try {
+             Thread.sleep(50);
+         } catch (InterruptedException e) {
+             Thread.currentThread().interrupt();
+         }
+     }, executorService);
 
      // Build event
      OrderCreatedEvent event = new OrderCreatedEvent(
@@ -84,10 +85,11 @@ public class OrderService {
 
      kafkaTemplate.send(ORDER_CREATED_TOPIC, saved.getId().toString(), payload).get();
 
-//     // optionally wait for asyncSideEffect if needed
-//     asyncSideEffect.whenComplete((v, ex) -> {
-//         // log completion or error
-//     });
+     // optionally wait for asyncSideEffect if needed
+     asyncSideEffect.whenComplete((v, ex) -> {
+         log.info("EVENT SENT");
+         log.debug("Order Payload={}", payload);
+     });
 
      System.out.println("EVENT SENT");
      System.out.println(payload);

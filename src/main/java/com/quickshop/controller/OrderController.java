@@ -1,6 +1,5 @@
 package com.quickshop.controller;
 
-import com.quickshop.common.entity.AuthenticatedUser;
 import com.quickshop.common.entity.UserPrincipal;
 import com.quickshop.feign.InventoryClient;
 import com.quickshop.feign.InventoryItemResponse;
@@ -31,15 +30,20 @@ public class OrderController {
  @Autowired
  private InventoryClient inventoryClient;
 
+
  @PostMapping(name = "/createOrder")
  public OrderResponse createOrder(@Valid @RequestBody CreateOrderRequest request) throws Exception {
      return orderService.createOrder(request);
  }
 
- @GetMapping("/{id}")
+
+
+    @GetMapping("/{id}")
  public OrderResponse getOrder(@PathVariable Long id) {
      return orderService.getOrder(id);
  }
+
+
 
  @GetMapping("getAllOrders")
  public Page<OrderResponse> listOrders(
@@ -77,6 +81,4 @@ public class OrderController {
                                 "email"))
                 .build();
     }
-
-
 }
