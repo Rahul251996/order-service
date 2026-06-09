@@ -101,7 +101,7 @@
 		<repository>
 			<id>nexus</id>
 			<url>
-				http://nexus:8081/repository/maven-snapshots/
+				http://localhost:8089/repository/maven-snapshots/
 			</url>
 		</repository>
 	</repositories>
