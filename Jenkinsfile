@@ -34,7 +34,7 @@ pipeline {
 
                 docker run -d \
                   --name order-service \
-                  --network quickshop_app-net \
+                  --network quickshop-gateway_app-net \
                   -p 8081:8081 \
                   ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
