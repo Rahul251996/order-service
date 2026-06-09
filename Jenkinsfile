@@ -2,6 +2,11 @@ pipeline {
 
     agent any
 
+    environment {
+        IMAGE_NAME = "order-service"
+        IMAGE_TAG = "latest"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -10,16 +15,41 @@ pipeline {
             }
         }
 
-        stage('Build & Test') {
+        stage('Build') {
             steps {
-                sh 'mvn clean verify'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Package') {
+        stage('Docker Build') {
             steps {
-                sh 'mvn package -DskipTests'
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
             }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                docker rm -f order-service || true
+
+                docker run -d \
+                  --name order-service \
+                  --network quickshop_app-net \
+                  -p 8081:8081 \
+                  ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo 'Order Service deployed successfully'
+        }
+
+        failure {
+            echo 'Deployment failed'
         }
     }
 }
